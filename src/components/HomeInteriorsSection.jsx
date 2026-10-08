@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,72 +47,10 @@ const ROOMS = [
   },
 ];
 
-export default function HomeInteriorsSection({ onSelectRoom }) {
+export default function HomeInteriorsSection() {
   const containerRef = useRef(null);
   const slideRefs = useRef([]);
   const [activeRoomIndex, setActiveRoomIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  const handleExploreRoom = (room, index) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-
-    const slideEl = slideRefs.current[index];
-    if (slideEl) {
-      const bgEl = slideEl.querySelector('.room-bg');
-      const infoEl = slideEl.querySelector('.room-info');
-      const btnEl = slideEl.querySelector('.btn-magnetic');
-
-      const tl = gsap.timeline({
-        onComplete: () => {
-          if (onSelectRoom) onSelectRoom(room);
-          setTimeout(() => {
-            if (bgEl && infoEl && btnEl) {
-              gsap.set([bgEl, infoEl, btnEl], { clearProps: 'all' });
-            }
-            setIsTransitioning(false);
-          }, 400);
-        },
-      });
-
-      // Cinematic room zoom, depth expansion, and soft edge blur
-      tl.to(
-        bgEl,
-        {
-          scale: 1.28,
-          filter: 'blur(8px) brightness(0.65)',
-          duration: 1.15,
-          ease: 'power2.inOut',
-        },
-        0
-      );
-
-      tl.to(
-        infoEl,
-        {
-          y: -25,
-          opacity: 0,
-          duration: 0.6,
-          ease: 'power2.in',
-        },
-        0
-      );
-
-      tl.to(
-        btnEl,
-        {
-          scale: 0.92,
-          opacity: 0,
-          duration: 0.5,
-          ease: 'power2.in',
-        },
-        0
-      );
-    } else {
-      if (onSelectRoom) onSelectRoom(room);
-      setIsTransitioning(false);
-    }
-  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -347,33 +284,6 @@ export default function HomeInteriorsSection({ onSelectRoom }) {
               >
                 {room.subtitle}
               </p>
-            </div>
-
-            {/* Bottom Room Call to Action */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '10vh',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                zIndex: 20,
-              }}
-            >
-              <button
-                onClick={() => handleExploreRoom(room, index)}
-                disabled={isTransitioning}
-                className="btn-magnetic"
-                style={{
-                  padding: '14px 28px',
-                  backgroundColor: 'rgba(10, 10, 9, 0.4)',
-                  backdropFilter: 'blur(10px)',
-                  opacity: isTransitioning ? 0.7 : 1,
-                  pointerEvents: isTransitioning ? 'none' : 'auto',
-                }}
-              >
-                <span>EXPLORE ROOM</span>
-                <ArrowRight size={14} />
-              </button>
             </div>
           </div>
         ))}

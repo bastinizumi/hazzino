@@ -38,6 +38,134 @@ function createRug(width, depth, color = 0xdad4c8) {
   return rug;
 }
 
+// Helper for Museum-Grade Bas-Relief Plaster Art
+function createMuseumBasReliefArtwork() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 768;
+  const ctx = canvas.getContext('2d');
+
+  // 1. Warm chalk alabaster background with fine plaster grain
+  const grad = ctx.createLinearGradient(0, 0, 1024, 768);
+  grad.addColorStop(0, '#f6f2e9');
+  grad.addColorStop(0.5, '#ede6da');
+  grad.addColorStop(1, '#e4dccf');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 1024, 768);
+
+  // Micro plaster noise/stippling
+  for (let i = 0; i < 4000; i++) {
+    const x = Math.random() * 1024;
+    const y = Math.random() * 768;
+    const r = Math.random() * 2.5;
+    ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.4)' : 'rgba(180,165,145,0.2)';
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 2. Sculpted architectural geometric relief layers (Axel Vervoordt / Studio Liaigre aesthetic)
+  ctx.shadowColor = 'rgba(70, 55, 40, 0.16)';
+  ctx.shadowBlur = 32;
+  ctx.shadowOffsetX = 12;
+  ctx.shadowOffsetY = 16;
+  ctx.fillStyle = '#e5dfd2';
+  ctx.beginPath();
+  ctx.arc(512, 420, 260, Math.PI, 0, false);
+  ctx.lineTo(772, 660);
+  ctx.lineTo(252, 660);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetX = 8;
+  ctx.shadowOffsetY = 10;
+  ctx.fillStyle = '#dbd3c2';
+  ctx.beginPath();
+  ctx.arc(512, 420, 190, Math.PI, 0, false);
+  ctx.lineTo(702, 660);
+  ctx.lineTo(322, 660);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#d2c8b4';
+  ctx.beginPath();
+  ctx.arc(512, 420, 120, Math.PI, 0, false);
+  ctx.lineTo(632, 660);
+  ctx.lineTo(392, 660);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowColor = 'transparent';
+
+  // Tactile impasto palette knife strokes
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.lineWidth = 4;
+  for (let s = 0; s < 12; s++) {
+    const sy = 280 + s * 28;
+    ctx.beginPath();
+    ctx.moveTo(340 + Math.sin(s) * 30, sy);
+    ctx.lineTo(680 - Math.sin(s) * 30, sy);
+    ctx.stroke();
+  }
+
+  // Subtle graphite architectural registration marks
+  ctx.strokeStyle = 'rgba(120, 105, 90, 0.25)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(120, 680);
+  ctx.lineTo(904, 680);
+  ctx.stroke();
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.anisotropy = 8;
+  return tex;
+}
+
+// Helper for Luxury High-Pile Organic Wool Bouclé Area Rug
+function createLuxuryOrganicRug(width, depth) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1024;
+  canvas.height = 1024;
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = '#ede8dd';
+  ctx.fillRect(0, 0, 1024, 1024);
+
+  for (let i = 0; i < 9000; i++) {
+    const x = Math.random() * 1024;
+    const y = Math.random() * 1024;
+    const r = 1.2 + Math.random() * 2.2;
+    ctx.fillStyle = Math.random() > 0.4 ? 'rgba(255,255,255,0.55)' : 'rgba(195,180,160,0.32)';
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Debossed border lines
+  ctx.strokeStyle = 'rgba(175, 160, 140, 0.35)';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(55, 55, 914, 914);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(58, 58, 908, 908);
+
+  const rugTex = new THREE.CanvasTexture(canvas);
+  rugTex.wrapS = THREE.RepeatWrapping;
+  rugTex.wrapT = THREE.RepeatWrapping;
+
+  const geom = new THREE.BoxGeometry(width, 0.02, depth, 16, 2, 16);
+  const mat = new THREE.MeshStandardMaterial({
+    map: rugTex,
+    roughness: 0.94,
+    metalness: 0.0,
+  });
+  const rug = new THREE.Mesh(geom, mat);
+  rug.position.set(0, 0.01, 0);
+  rug.receiveShadow = true;
+  return rug;
+}
+
 // ============================================================================
 // 01 — LIVING ROOM SCENE
 // ============================================================================
@@ -50,6 +178,7 @@ export function buildLivingRoomScene() {
   const boucleMat = createFurnitureMaterial('boucle');
   const walnutMat = createFurnitureMaterial('smoked_walnut');
   const travertineMat = createFurnitureMaterial('travertine');
+  const calacattaMat = createFurnitureMaterial('calacatta');
   const brassMat = createBrassAccentMaterial();
 
   // 1. COMPLETE 3D ARCHITECTURAL ROOM ENVELOPE
@@ -63,238 +192,351 @@ export function buildLivingRoomScene() {
   });
   fixedGroup.add(shell.group);
 
-  // Vertical dark walnut fluted feature wall on back wall (matching reference image)
-  const flutedWallGroup = new THREE.Group();
-  flutedWallGroup.position.set(0, 2.1, -5.46);
-  const slatWidth = 0.045;
-  const slatSpacing = 0.085;
-  for (let x = -4.5; x <= 4.5; x += slatSpacing) {
-    const slat = new THREE.Mesh(
-      new THREE.BoxGeometry(slatWidth, 4.16, 0.035),
-      walnutMat
-    );
-    slat.position.set(x, 0, 0);
-    slat.castShadow = true;
-    flutedWallGroup.add(slat);
-  }
-  fixedGroup.add(flutedWallGroup);
+  // Grand Architectural Roman Travertine Accent Wall Panel (Replaces harsh dark barcode slats)
+  const travertineWallMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(6.4, 4.16, 0.08),
+    travertineMat
+  );
+  travertineWallMesh.position.set(0, 2.08, -5.44);
+  travertineWallMesh.receiveShadow = true;
+  fixedGroup.add(travertineWallMesh);
 
-  // Recessed warm ceiling cove light strip above the wood slats
-  const coveGlow = new THREE.Mesh(
-    new THREE.BoxGeometry(9.2, 0.04, 0.08),
+  // Vertical Aged Brushed Brass Inset Reveal Channels
+  [-3.21, 3.21].forEach((bx) => {
+    const brassReveal = new THREE.Mesh(
+      new THREE.BoxGeometry(0.024, 4.16, 0.09),
+      brassMat
+    );
+    brassReveal.position.set(bx, 2.08, -5.43);
+    fixedGroup.add(brassReveal);
+  });
+
+  // Soft Architectural Plaster Micro-Fluting on Side Margins
+  const flutedPlasterMat = new THREE.MeshStandardMaterial({ color: 0xe6e0d4, roughness: 0.88 });
+  for (let fx = -5.2; fx <= -3.26; fx += 0.09) {
+    const flute = new THREE.Mesh(new THREE.BoxGeometry(0.045, 4.16, 0.035), flutedPlasterMat);
+    flute.position.set(fx, 2.08, -5.46);
+    flute.receiveShadow = true;
+    fixedGroup.add(flute);
+  }
+  for (let fx = 3.26; fx <= 5.2; fx += 0.09) {
+    const flute = new THREE.Mesh(new THREE.BoxGeometry(0.045, 4.16, 0.035), flutedPlasterMat);
+    flute.position.set(fx, 2.08, -5.46);
+    flute.receiveShadow = true;
+    fixedGroup.add(flute);
+  }
+
+  // Floating Cantilevered Travertine Display Hearth Plinth at wall base
+  const hearthPlinth = new THREE.Mesh(
+    new THREE.BoxGeometry(6.6, 0.22, 0.46),
+    travertineMat
+  );
+  hearthPlinth.position.set(0, 0.11, -5.24);
+  hearthPlinth.castShadow = true;
+  hearthPlinth.receiveShadow = true;
+  fixedGroup.add(hearthPlinth);
+
+  // Concealed warm 2700K ambient LED cove wash under the hearth
+  const underHearthGlow = new THREE.Mesh(
+    new THREE.BoxGeometry(6.4, 0.025, 0.06),
     createEmissiveWarmGlowMaterial()
   );
-  coveGlow.position.set(0, 4.14, -5.42);
+  underHearthGlow.position.set(0, 0.02, -5.18);
+  fixedGroup.add(underHearthGlow);
+
+  // Recessed warm ceiling cove light strip above the feature wall
+  const coveGlow = new THREE.Mesh(
+    new THREE.BoxGeometry(6.6, 0.04, 0.08),
+    createEmissiveWarmGlowMaterial()
+  );
+  coveGlow.position.set(0, 4.14, -5.38);
   fixedGroup.add(coveGlow);
 
-  // Large Framed Abstract Art Canvas on center of back wall (matching reference)
+  // Large Framed Museum-Grade Bas-Relief Plaster Artwork
   const artGroup = new THREE.Group();
-  artGroup.position.set(0, 2.65, -5.4);
-  const artFrame = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.6, 0.05), walnutMat);
+  artGroup.position.set(0, 2.35, -5.38);
+  const artFrame = new THREE.Mesh(new THREE.BoxGeometry(2.84, 1.74, 0.04), brassMat);
   artGroup.add(artFrame);
 
-  // Canvas with warm beige/sand abstract composition
-  const artCanvas = document.createElement('canvas');
-  artCanvas.width = 512;
-  artCanvas.height = 384;
-  const aCtx = artCanvas.getContext('2d');
-  aCtx.fillStyle = '#f0ece1';
-  aCtx.fillRect(0, 0, 512, 384);
-  // Layered architectural textured blocks
-  aCtx.fillStyle = '#d9d0c1';
-  aCtx.fillRect(60, 40, 160, 240);
-  aCtx.fillStyle = '#c5b8a5';
-  aCtx.fillRect(180, 100, 220, 200);
-  aCtx.fillStyle = '#bda07b';
-  aCtx.fillRect(260, 160, 120, 140);
-  aCtx.fillStyle = '#e8e2d5';
-  aCtx.fillRect(120, 80, 140, 180);
-  const artTex = new THREE.CanvasTexture(artCanvas);
+  const artTex = createMuseumBasReliefArtwork();
   const artMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.1, 1.5),
-    new THREE.MeshStandardMaterial({ map: artTex, roughness: 0.95 })
+    new THREE.PlaneGeometry(2.8, 1.7),
+    new THREE.MeshStandardMaterial({ map: artTex, roughness: 0.92 })
   );
-  artMesh.position.z = 0.026;
+  artMesh.position.z = 0.022;
   artGroup.add(artMesh);
   fixedGroup.add(artGroup);
 
-  // Woven Area Rug (Large Ivory Loop Wool Rug matching reference)
-  fixedGroup.add(createRug(6.2, 4.2, 0xe2ded4));
+  // Woven Luxury High-Pile Organic Wool Bouclé Area Rug
+  fixedGroup.add(createLuxuryOrganicRug(6.6, 4.6));
 
-  // Potted Fiddle-Leaf Fig Tree in Rustic Terracotta Urn Pot (Right background)
+  // Sculptural Botanical Black Olive Tree in Fluted Pedestal Urn (Right background)
   const plantGroup = new THREE.Group();
   plantGroup.position.set(3.4, 0, -2.6);
+
   const urnPot = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.32, 0.22, 0.65, 24),
-    new THREE.MeshStandardMaterial({ color: 0xb59b82, roughness: 0.92 })
+    new THREE.CylinderGeometry(0.36, 0.24, 0.72, 32),
+    travertineMat
   );
-  urnPot.position.y = 0.325;
+  urnPot.position.y = 0.36;
   urnPot.castShadow = true;
   plantGroup.add(urnPot);
+
   const treeTrunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.025, 0.035, 1.4, 12),
+    new THREE.CylinderGeometry(0.03, 0.045, 1.6, 16),
     walnutMat
   );
-  treeTrunk.position.y = 1.0;
+  treeTrunk.position.y = 1.1;
+  treeTrunk.castShadow = true;
   plantGroup.add(treeTrunk);
-  const figLeafMat = new THREE.MeshStandardMaterial({ color: 0x3d5236, roughness: 0.65 });
+
   [
-    [0, 1.5, 0, 0.38],
-    [0.18, 1.75, -0.12, 0.34],
-    [-0.15, 1.9, 0.1, 0.32],
-    [0.2, 2.05, 0.08, 0.28],
-    [-0.1, 2.2, -0.05, 0.25],
+    [-0.15, 1.5, 0.08, -0.25],
+    [0.18, 1.7, -0.1, 0.3],
+    [-0.1, 1.9, 0.12, 0.2],
+  ].forEach(([bx, by, bz, bRot]) => {
+    const branch = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.02, 0.65, 12),
+      walnutMat
+    );
+    branch.position.set(bx, by, bz);
+    branch.rotation.z = bRot;
+    branch.castShadow = true;
+    plantGroup.add(branch);
+  });
+
+  const oliveLeafMat = new THREE.MeshStandardMaterial({ color: 0x3d5438, roughness: 0.6 });
+  [
+    [0, 1.85, 0, 0.42],
+    [0.32, 2.1, -0.16, 0.38],
+    [-0.28, 2.25, 0.18, 0.36],
+    [0.24, 2.45, 0.12, 0.32],
+    [-0.18, 2.55, -0.12, 0.30],
+    [0.05, 2.7, 0, 0.26],
   ].forEach(([lx, ly, lz, lr]) => {
-    const leaf = new THREE.Mesh(new THREE.DodecahedronGeometry(lr, 1), figLeafMat);
-    leaf.scale.set(1.2, 0.8, 1.4);
+    const leaf = new THREE.Mesh(new THREE.DodecahedronGeometry(lr, 2), oliveLeafMat);
+    leaf.scale.set(1.3, 0.7, 1.2);
     leaf.position.set(lx, ly, lz);
     leaf.castShadow = true;
     plantGroup.add(leaf);
   });
   fixedGroup.add(plantGroup);
 
-  // Floor Lamp with Brass Arch & Linen Shade (Left background)
+  // Architectural Arched Brass & Frosted Sphere Floor Lamp (Left background)
   const lampGroup = new THREE.Group();
-  lampGroup.position.set(-3.2, 0, -2.4);
-  const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.04, 24), brassMat);
-  lampBase.position.y = 0.02;
+  lampGroup.position.set(-3.3, 0, -2.4);
+  const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.30, 0.06, 32), travertineMat);
+  lampBase.position.y = 0.03;
+  lampBase.castShadow = true;
   lampGroup.add(lampBase);
-  const lampStem = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 1.9, 16), brassMat);
-  lampStem.position.y = 0.95;
+
+  const lampStem = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 2.05, 16), brassMat);
+  lampStem.position.y = 1.05;
+  lampStem.castShadow = true;
   lampGroup.add(lampStem);
+
+  const lampArm = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.65, 16), brassMat);
+  lampArm.position.set(0.24, 2.05, 0.18);
+  lampArm.rotation.z = -Math.PI * 0.32;
+  lampGroup.add(lampArm);
+
   const lampShade = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.25, 0.32, 0.36, 24),
-    new THREE.MeshStandardMaterial({ color: 0xfff2e0, roughness: 0.9 })
+    new THREE.SphereGeometry(0.22, 32, 32),
+    new THREE.MeshStandardMaterial({ color: 0xfff6ec, roughness: 0.15, transparent: true, opacity: 0.95 })
   );
-  lampShade.position.y = 1.8;
+  lampShade.position.set(0.48, 1.95, 0.35);
   lampGroup.add(lampShade);
+
+  const lampLight = new THREE.PointLight(0xffeedd, 0.85, 4.5);
+  lampLight.position.set(0.48, 1.95, 0.35);
+  lampGroup.add(lampLight);
   fixedGroup.add(lampGroup);
 
-  // Minimalist Sleek Lounge Chair (Right foreground, matching reference)
-  const loungeChairRight = new THREE.Group();
-  loungeChairRight.position.set(2.4, 0, 0.5);
-  loungeChairRight.rotation.y = -Math.PI * 0.42;
-  const metalFrameMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.92, roughness: 0.2 });
-  const leatherMat = createFurnitureMaterial('leather');
-  // Tubing legs
-  const lSeat = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.08, 0.65), leatherMat);
-  lSeat.position.set(0, 0.32, 0);
-  lSeat.rotation.x = -0.12;
-  lSeat.castShadow = true;
-  loungeChairRight.add(lSeat);
-  const lBack = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.52, 0.06), leatherMat);
-  lBack.position.set(0, 0.58, -0.28);
-  lBack.rotation.x = -0.35;
-  lBack.castShadow = true;
-  loungeChairRight.add(lBack);
-  // Chrome sled base
-  [[-0.34, 0], [0.34, 0]].forEach(([rx]) => {
-    const legRail = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.72, 12), metalFrameMat);
-    legRail.rotation.x = Math.PI / 2;
-    legRail.position.set(rx, 0.015, 0);
-    loungeChairRight.add(legRail);
+  // Sculptural Swivel Barrel Club Chair in Cognac Saddle Leather (Right foreground)
+  const clubChairRight = new THREE.Group();
+  clubChairRight.position.set(2.4, 0, 0.6);
+  clubChairRight.rotation.y = -Math.PI * 0.38;
+
+  const saddleLeatherMat = createFurnitureMaterial('leather');
+
+  const swivelBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.34, 0.36, 0.05, 32),
+    brassMat
+  );
+  swivelBase.position.y = 0.025;
+  clubChairRight.add(swivelBase);
+
+  const clubSeat = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.38, 0.38, 0.18, 32),
+    saddleLeatherMat
+  );
+  clubSeat.position.y = 0.20;
+  clubSeat.castShadow = true;
+  clubChairRight.add(clubSeat);
+
+  const clubBack = new THREE.Mesh(
+    new THREE.BoxGeometry(0.74, 0.52, 0.22, 10, 6, 6),
+    saddleLeatherMat
+  );
+  clubBack.position.set(0, 0.45, -0.22);
+  clubBack.castShadow = true;
+  clubChairRight.add(clubBack);
+
+  [-0.34, 0.34].forEach((ax, idx) => {
+    const arm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.38, 0.54, 6, 6, 8),
+      saddleLeatherMat
+    );
+    arm.position.set(ax, 0.40, -0.06);
+    arm.rotation.y = idx === 0 ? 0.16 : -0.16;
+    arm.castShadow = true;
+    clubChairRight.add(arm);
   });
-  fixedGroup.add(loungeChairRight);
+
+  const clubPillow = new THREE.Mesh(
+    new THREE.BoxGeometry(0.32, 0.22, 0.10),
+    boucleMat
+  );
+  clubPillow.position.set(0, 0.32, -0.14);
+  clubPillow.rotation.x = 0.12;
+  clubPillow.castShadow = true;
+  clubChairRight.add(clubPillow);
+
+  fixedGroup.add(clubChairRight);
 
   // 2. INTERACTIVE FURNITURE PIECES
   const interactiveFurniture = {};
 
   // --------------------------------------------------------------------------
-  // OBJECT A: CURVED ORGANIC BOUCLÉ SOFA (Hero center piece)
+  // OBJECT A: CURVED BESPOKE BOUCLÉ LOUNGE SECTIONAL (Hero center piece)
   // --------------------------------------------------------------------------
   const sofaRoot = new THREE.Group();
   sofaRoot.name = 'Interactive_Sofa';
-  sofaRoot.position.set(0, 0, -0.7);
+  sofaRoot.position.set(0, 0, -0.65);
 
-  // Main curved segmented cushions (Organic curved lounge)
   const sofaMaterials = { current: boucleMat };
 
-  // Center cushion
+  // Main Curved Modular Lounge Cushions (Smooth, plush, organic)
   const sofaCenterCushion = new THREE.Mesh(
-    new THREE.BoxGeometry(1.6, 0.38, 0.95, 12, 6, 12),
+    new THREE.BoxGeometry(1.72, 0.40, 1.05, 12, 6, 12),
     sofaMaterials.current
   );
-  sofaCenterCushion.position.set(0, 0.25, 0);
+  sofaCenterCushion.position.set(0, 0.24, 0);
   sofaCenterCushion.castShadow = true;
   sofaCenterCushion.receiveShadow = true;
   sofaRoot.add(sofaCenterCushion);
 
-  // Left wing cushion (curving gently forward)
   const sofaLeftWing = new THREE.Mesh(
-    new THREE.BoxGeometry(1.2, 0.38, 0.92, 10, 6, 10),
+    new THREE.BoxGeometry(1.36, 0.40, 1.02, 10, 6, 10),
     sofaMaterials.current
   );
-  sofaLeftWing.position.set(-1.3, 0.25, 0.18);
-  sofaLeftWing.rotation.y = 0.22;
+  sofaLeftWing.position.set(-1.38, 0.24, 0.20);
+  sofaLeftWing.rotation.y = 0.26;
   sofaLeftWing.castShadow = true;
   sofaRoot.add(sofaLeftWing);
 
-  // Right wing cushion (curving gently forward)
   const sofaRightWing = new THREE.Mesh(
-    new THREE.BoxGeometry(1.2, 0.38, 0.92, 10, 6, 10),
+    new THREE.BoxGeometry(1.36, 0.40, 1.02, 10, 6, 10),
     sofaMaterials.current
   );
-  sofaRightWing.position.set(1.3, 0.25, 0.18);
-  sofaRightWing.rotation.y = -0.22;
+  sofaRightWing.position.set(1.38, 0.24, 0.20);
+  sofaRightWing.rotation.y = -0.26;
   sofaRightWing.castShadow = true;
   sofaRoot.add(sofaRightWing);
 
-  // Backrest (sweeping organic curvature)
+  // Sculptural Low-Slung Curved Backrests
   const sofaBackCenter = new THREE.Mesh(
-    new THREE.BoxGeometry(1.58, 0.48, 0.26, 12, 6, 6),
+    new THREE.BoxGeometry(1.70, 0.52, 0.30, 12, 6, 6),
     sofaMaterials.current
   );
-  sofaBackCenter.position.set(0, 0.58, -0.38);
+  sofaBackCenter.position.set(0, 0.60, -0.42);
   sofaBackCenter.castShadow = true;
   sofaRoot.add(sofaBackCenter);
 
   const sofaBackLeft = new THREE.Mesh(
-    new THREE.BoxGeometry(1.18, 0.48, 0.26, 10, 6, 6),
+    new THREE.BoxGeometry(1.34, 0.52, 0.30, 10, 6, 6),
     sofaMaterials.current
   );
-  sofaBackLeft.position.set(-1.26, 0.58, -0.2);
-  sofaBackLeft.rotation.y = 0.22;
+  sofaBackLeft.position.set(-1.36, 0.60, -0.22);
+  sofaBackLeft.rotation.y = 0.26;
   sofaBackLeft.castShadow = true;
   sofaRoot.add(sofaBackLeft);
 
   const sofaBackRight = new THREE.Mesh(
-    new THREE.BoxGeometry(1.18, 0.48, 0.26, 10, 6, 6),
+    new THREE.BoxGeometry(1.34, 0.52, 0.30, 10, 6, 6),
     sofaMaterials.current
   );
-  sofaBackRight.position.set(1.26, 0.58, -0.2);
-  sofaBackRight.rotation.y = -0.22;
+  sofaBackRight.position.set(1.36, 0.60, -0.22);
+  sofaBackRight.rotation.y = -0.26;
   sofaBackRight.castShadow = true;
   sofaRoot.add(sofaBackRight);
 
-  // Cushions & Folded Throw Blanket (terracotta, camel, charcoal matching reference)
-  const cushionsGroup = new THREE.Group();
-  const cPillows = [
-    { pos: [-0.95, 0.52, -0.15], rot: 0.18, color: 0xb5714e, size: [0.38, 0.38, 0.14] }, // Terracotta
-    { pos: [-0.55, 0.52, -0.18], rot: -0.08, color: 0x9c7953, size: [0.36, 0.36, 0.13] }, // Camel
-    { pos: [0.65, 0.52, -0.18], rot: 0.12, color: 0xa8845e, size: [0.36, 0.36, 0.13] }, // Warm Taupe
-    { pos: [1.05, 0.52, -0.15], rot: -0.15, color: 0x33363b, size: [0.38, 0.38, 0.14] }, // Charcoal
-  ];
-  cPillows.forEach((p) => {
-    const mat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.9 });
-    const cMesh = new THREE.Mesh(new THREE.BoxGeometry(...p.size), mat);
-    cMesh.position.set(...p.pos);
-    cMesh.rotation.y = p.rot;
-    cMesh.castShadow = true;
-    cushionsGroup.add(cMesh);
-  });
-  // Folded linen blanket draped on sofa
-  const throwBlanket = new THREE.Mesh(
-    new THREE.BoxGeometry(0.55, 0.12, 0.72),
-    createFurnitureMaterial('linen')
+  // Outer Arm Returns
+  const sofaArmLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.30, 0.44, 0.88, 6, 6, 8),
+    sofaMaterials.current
   );
-  throwBlanket.position.set(-0.15, 0.42, 0.05);
-  throwBlanket.rotation.y = 0.05;
+  sofaArmLeft.position.set(-2.02, 0.52, 0.34);
+  sofaArmLeft.rotation.y = 0.26;
+  sofaArmLeft.castShadow = true;
+  sofaRoot.add(sofaArmLeft);
+
+  const sofaArmRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.30, 0.44, 0.88, 6, 6, 8),
+    sofaMaterials.current
+  );
+  sofaArmRight.position.set(2.02, 0.52, 0.34);
+  sofaArmRight.rotation.y = -0.26;
+  sofaArmRight.castShadow = true;
+  sofaRoot.add(sofaArmRight);
+
+  // Artfully Styled Designer Pillows & Draped Cashmere Throw
+  const cushionsGroup = new THREE.Group();
+
+  // Cylindrical Bolster in Cognac Saddle Leather
+  const bolsterGeo = new THREE.CylinderGeometry(0.085, 0.085, 0.46, 24);
+  const bolster = new THREE.Mesh(bolsterGeo, createFurnitureMaterial('leather'));
+  bolster.rotation.z = Math.PI / 2;
+  bolster.rotation.y = 0.26;
+  bolster.position.set(-1.20, 0.50, -0.14);
+  bolster.castShadow = true;
+  cushionsGroup.add(bolster);
+
+  // Tailored Bouclé Accent Pillow (Ivory, resting naturally against backrest)
+  const pillowA = new THREE.Mesh(new THREE.BoxGeometry(0.40, 0.38, 0.14), boucleMat);
+  pillowA.position.set(-0.62, 0.48, -0.22);
+  pillowA.rotation.set(0.18, 0.14, -0.05);
+  pillowA.castShadow = true;
+  cushionsGroup.add(pillowA);
+
+  // Soft Camel Velvet Accent Pillow (Resting naturally against backrest)
+  const pillowB = new THREE.Mesh(
+    new THREE.BoxGeometry(0.38, 0.36, 0.14),
+    new THREE.MeshStandardMaterial({ color: 0x9c7953, roughness: 0.85 })
+  );
+  pillowB.position.set(0.72, 0.48, -0.22);
+  pillowB.rotation.set(0.18, -0.16, 0.05);
+  pillowB.castShadow = true;
+  cushionsGroup.add(pillowB);
+
+  // Draped Cashmere Throw Blanket cascading naturally
+  const throwMat = new THREE.MeshStandardMaterial({
+    color: 0xa49888,
+    roughness: 0.94,
+  });
+  const throwBlanket = new THREE.Mesh(
+    new THREE.BoxGeometry(0.56, 0.038, 0.74),
+    throwMat
+  );
+  throwBlanket.position.set(1.42, 0.44, 0.18);
+  throwBlanket.rotation.y = -0.26;
   throwBlanket.castShadow = true;
   cushionsGroup.add(throwBlanket);
+
   sofaRoot.add(cushionsGroup);
 
-  // Sofa Recessed Walnut Plinth Base
-  const sofaPlinth = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.08, 0.88), walnutMat);
+  // Recessed Smoked Walnut Plinth Base
+  const sofaPlinth = new THREE.Mesh(new THREE.BoxGeometry(3.75, 0.08, 0.96), walnutMat);
   sofaPlinth.position.set(0, 0.04, 0);
   sofaPlinth.castShadow = true;
   sofaRoot.add(sofaPlinth);
@@ -306,15 +548,17 @@ export function buildLivingRoomScene() {
     sofaBackCenter,
     sofaBackLeft,
     sofaBackRight,
+    sofaArmLeft,
+    sofaArmRight,
   ];
 
   interactiveFurniture.sofa = {
     id: 'sofa',
-    name: 'CURVED ARCHITECTURAL BOUCLÉ SOFA',
+    name: 'BESPOKE SCULPTURAL BOUCLÉ MODULAR SECTIONAL',
     shortName: 'BOUCLÉ SOFA',
     type: 'sofa',
     group: sofaRoot,
-    hotspotPos: [0, 0.75, -0.7],
+    hotspotPos: [0, 0.75, -0.65],
     features: { canRotate: true, canExplode: true, hasDoors: false, hasDrawers: false },
     materialsSupported: ['boucle', 'linen', 'leather', 'smoked_walnut'],
     defaultMaterial: 'boucle',
@@ -325,106 +569,175 @@ export function buildLivingRoomScene() {
       });
     },
     setExplode: (progress) => {
-      // Main cushions separate outward & upward
-      sofaCenterCushion.position.y = 0.25 + progress * 0.45;
-      sofaLeftWing.position.x = -1.3 - progress * 0.55;
-      sofaLeftWing.position.y = 0.25 + progress * 0.45;
-      sofaRightWing.position.x = 1.3 + progress * 0.55;
-      sofaRightWing.position.y = 0.25 + progress * 0.45;
+      sofaCenterCushion.position.y = 0.24 + progress * 0.45;
+      sofaLeftWing.position.x = -1.38 - progress * 0.55;
+      sofaLeftWing.position.y = 0.24 + progress * 0.45;
+      sofaRightWing.position.x = 1.38 + progress * 0.55;
+      sofaRightWing.position.y = 0.24 + progress * 0.45;
 
-      // Backrests lift backward & upward
-      sofaBackCenter.position.z = -0.38 - progress * 0.6;
-      sofaBackCenter.position.y = 0.58 + progress * 0.35;
-      sofaBackLeft.position.z = -0.2 - progress * 0.5;
-      sofaBackLeft.position.x = -1.26 - progress * 0.4;
-      sofaBackRight.position.z = -0.2 - progress * 0.5;
-      sofaBackRight.position.x = 1.26 + progress * 0.4;
+      sofaBackCenter.position.z = -0.42 - progress * 0.60;
+      sofaBackCenter.position.y = 0.60 + progress * 0.35;
+      sofaBackLeft.position.z = -0.22 - progress * 0.50;
+      sofaBackLeft.position.x = -1.36 - progress * 0.40;
+      sofaBackRight.position.z = -0.22 - progress * 0.50;
+      sofaBackRight.position.x = 1.36 + progress * 0.40;
 
-      // Decorative cushions lift high
-      cushionsGroup.position.y = progress * 0.7;
+      sofaArmLeft.position.x = -2.02 - progress * 0.45;
+      sofaArmRight.position.x = 2.02 + progress * 0.45;
 
-      // Base plinth lowers
+      cushionsGroup.position.y = progress * 0.75;
       sofaPlinth.position.y = 0.04 - progress * 0.15;
     },
     reset: () => {
       sofaRoot.rotation.y = 0;
-      sofaCenterCushion.position.set(0, 0.25, 0);
-      sofaLeftWing.position.set(-1.3, 0.25, 0.18);
-      sofaRightWing.position.set(1.3, 0.25, 0.18);
-      sofaBackCenter.position.set(0, 0.58, -0.38);
-      sofaBackLeft.position.set(-1.26, 0.58, -0.2);
-      sofaBackRight.position.set(1.26, 0.58, -0.2);
+      sofaCenterCushion.position.set(0, 0.24, 0);
+      sofaLeftWing.position.set(-1.38, 0.24, 0.20);
+      sofaRightWing.position.set(1.38, 0.24, 0.20);
+      sofaBackCenter.position.set(0, 0.60, -0.42);
+      sofaBackLeft.position.set(-1.36, 0.60, -0.22);
+      sofaBackRight.position.set(1.36, 0.60, -0.22);
+      sofaArmLeft.position.set(-2.02, 0.52, 0.34);
+      sofaArmRight.position.set(2.02, 0.52, 0.34);
       cushionsGroup.position.y = 0;
       sofaPlinth.position.set(0, 0.04, 0);
     },
   };
 
   // --------------------------------------------------------------------------
-  // OBJECT B: TRAVERTINE SCULPTURAL COFFEE TABLE (matching reference)
+  // OBJECT B: DUAL-TIER NESTING TRAVERTINE & BRONZE COCKTAIL TABLE SET
   // --------------------------------------------------------------------------
   const tableRoot = new THREE.Group();
   tableRoot.name = 'Interactive_CoffeeTable';
   tableRoot.position.set(0, 0, 0.55);
 
+  // 1. Primary Low Monolithic Honed Travertine Slab
   const tableTop = new THREE.Mesh(
-    new THREE.BoxGeometry(1.65, 0.065, 0.88),
+    new THREE.BoxGeometry(1.68, 0.07, 0.84),
     travertineMat
   );
-  tableTop.position.set(0, 0.35, 0);
+  tableTop.position.set(0, 0.31, 0);
   tableTop.castShadow = true;
   tableTop.receiveShadow = true;
   tableRoot.add(tableTop);
 
-  // Sculptural monolithic flared travertine pedestal base
+  // Two Sculptural Fluted Elliptical Travertine Plinth Bases
   const tableBaseColL = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.22, 0.28, 0.32, 24),
+    new THREE.CylinderGeometry(0.24, 0.28, 0.28, 32),
     travertineMat
   );
-  tableBaseColL.position.set(-0.45, 0.16, 0);
+  tableBaseColL.position.set(-0.48, 0.14, 0);
   tableBaseColL.castShadow = true;
   tableRoot.add(tableBaseColL);
 
   const tableBaseColR = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.22, 0.28, 0.32, 24),
+    new THREE.CylinderGeometry(0.24, 0.28, 0.28, 32),
     travertineMat
   );
-  tableBaseColR.position.set(0.45, 0.16, 0);
+  tableBaseColR.position.set(0.48, 0.14, 0);
   tableBaseColR.castShadow = true;
   tableRoot.add(tableBaseColR);
 
-  // Tabletop decor: Ceramic vase with dried twigs, art books, brass dish
-  const tableDecor = new THREE.Group();
-  tableDecor.position.set(0, 0.38, 0);
-
-  const book1 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.3, 0.03, 0.24),
-    new THREE.MeshStandardMaterial({ color: 0x1f1f1f, roughness: 0.4 })
+  // Inset Brushed Brass Leveling Base Rings
+  const baseRingL = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.285, 0.285, 0.02, 32),
+    brassMat
   );
-  book1.position.set(-0.15, 0.015, 0.05);
-  book1.rotation.y = 0.08;
+  baseRingL.position.set(-0.48, 0.01, 0);
+  tableRoot.add(baseRingL);
+
+  const baseRingR = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.285, 0.285, 0.02, 32),
+    brassMat
+  );
+  baseRingR.position.set(0.48, 0.01, 0);
+  tableRoot.add(baseRingR);
+
+  // 2. Secondary Cantilever Satellite Cocktail Table (Brushed Bronze & Smoked Walnut)
+  const satTableGroup = new THREE.Group();
+  satTableGroup.position.set(0.56, 0, 0.36);
+
+  const satTop = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.28, 0.28, 0.035, 32),
+    brassMat
+  );
+  satTop.position.y = 0.42;
+  satTop.castShadow = true;
+  satTableGroup.add(satTop);
+
+  const satStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.022, 0.022, 0.39, 16),
+    brassMat
+  );
+  satStem.position.y = 0.205;
+  satStem.castShadow = true;
+  satTableGroup.add(satStem);
+
+  const satBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.18, 0.18, 0.02, 24),
+    brassMat
+  );
+  satBase.position.y = 0.01;
+  satTableGroup.add(satBase);
+
+  tableRoot.add(satTableGroup);
+
+  // 3. Curated High-End Tabletop Objects
+  const tableDecor = new THREE.Group();
+  tableDecor.position.set(0, 0.345, 0);
+
+  // Architectural Monograph Hardcover Art Books
+  const book1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.32, 0.032, 0.24),
+    new THREE.MeshStandardMaterial({ color: 0x1f1f1f, roughness: 0.35 })
+  );
+  book1.position.set(-0.24, 0.016, 0.05);
+  book1.rotation.y = 0.06;
+  book1.castShadow = true;
   tableDecor.add(book1);
 
+  const book2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.28, 0.028, 0.22),
+    new THREE.MeshStandardMaterial({ color: 0xdfd8cc, roughness: 0.75 })
+  );
+  book2.position.set(-0.24, 0.046, 0.05);
+  book2.rotation.y = 0.16;
+  book2.castShadow = true;
+  tableDecor.add(book2);
+
+  // Hand-Thrown Wabi-Sabi Ceramic Vase with Delicate Branch
   const ceramicVase = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.08, 0.12, 0.24, 20),
+    new THREE.CylinderGeometry(0.07, 0.11, 0.22, 24),
     new THREE.MeshStandardMaterial({ color: 0xeee8dc, roughness: 0.85 })
   );
-  ceramicVase.position.set(0.12, 0.12, -0.04);
+  ceramicVase.position.set(0.12, 0.11, -0.06);
+  ceramicVase.castShadow = true;
   tableDecor.add(ceramicVase);
 
   const twigStem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.005, 0.008, 0.42, 8),
+    new THREE.CylinderGeometry(0.005, 0.008, 0.44, 8),
     walnutMat
   );
-  twigStem.position.set(0.12, 0.35, -0.04);
-  twigStem.rotation.z = -0.15;
+  twigStem.position.set(0.12, 0.32, -0.06);
+  twigStem.rotation.z = -0.16;
+  twigStem.rotation.x = 0.08;
+  twigStem.castShadow = true;
   tableDecor.add(twigStem);
 
-  const brassVessel = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.09, 0.06, 0.07, 16),
+  // Carved Organic Marble Catchall Dish with Brass Sphere
+  const marbleDish = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.10, 0.07, 0.035, 24),
+    calacattaMat
+  );
+  marbleDish.position.set(0.26, 0.018, 0.10);
+  marbleDish.castShadow = true;
+  tableDecor.add(marbleDish);
+
+  const brassSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(0.024, 16, 16),
     brassMat
   );
-  brassVessel.position.set(0.28, 0.035, 0.08);
-  tableDecor.add(brassVessel);
+  brassSphere.position.set(0.26, 0.042, 0.10);
+  tableDecor.add(brassSphere);
 
   tableRoot.add(tableDecor);
 
@@ -432,7 +745,7 @@ export function buildLivingRoomScene() {
 
   interactiveFurniture.table = {
     id: 'table',
-    name: 'TRAVERTINE SCULPTURAL COFFEE TABLE',
+    name: 'DUAL-TIER NESTING TRAVERTINE & BRONZE COCKTAIL TABLE',
     shortName: 'COFFEE TABLE',
     type: 'table',
     group: tableRoot,
@@ -447,17 +760,20 @@ export function buildLivingRoomScene() {
       });
     },
     setExplode: (progress) => {
-      tableTop.position.y = 0.35 + progress * 0.55;
-      tableBaseColL.position.x = -0.45 - progress * 0.4;
-      tableBaseColR.position.x = 0.45 + progress * 0.4;
-      tableDecor.position.y = 0.38 + progress * 0.8;
+      tableTop.position.y = 0.31 + progress * 0.55;
+      tableBaseColL.position.x = -0.48 - progress * 0.40;
+      tableBaseColR.position.x = 0.48 + progress * 0.40;
+      satTableGroup.position.x = 0.56 + progress * 0.45;
+      satTableGroup.position.z = 0.36 + progress * 0.25;
+      tableDecor.position.y = 0.345 + progress * 0.85;
     },
     reset: () => {
       tableRoot.rotation.y = 0;
-      tableTop.position.set(0, 0.35, 0);
-      tableBaseColL.position.set(-0.45, 0.16, 0);
-      tableBaseColR.position.set(0.45, 0.16, 0);
-      tableDecor.position.set(0, 0.38, 0);
+      tableTop.position.set(0, 0.31, 0);
+      tableBaseColL.position.set(-0.48, 0.14, 0);
+      tableBaseColR.position.set(0.48, 0.14, 0);
+      satTableGroup.position.set(0.56, 0, 0.36);
+      tableDecor.position.set(0, 0.345, 0);
     },
   };
 
@@ -2060,41 +2376,13 @@ export function buildDiningScene() {
   // Aligned perfectly on floor, not floating, not intersecting table!
   // --------------------------------------------------------------------------
   function createDetailedDiningChair() {
-    const chair = new THREE.Group();
-
-    // Woven / bouclé contoured seat pad
-    const seatPad = new THREE.Mesh(
-      new THREE.BoxGeometry(0.48, 0.05, 0.46),
-      walnutMat
-    );
-    seatPad.position.set(0, 0.44, 0);
-    seatPad.castShadow = true;
-    chair.add(seatPad);
-
-    // Steam-bent curved solid wood backrest
-    const backrest = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.24, 0.24, 0.18, 20, 1, true, -Math.PI / 2, Math.PI),
-      walnutMat
-    );
-    backrest.position.set(0, 0.68, -0.12);
-    backrest.castShadow = true;
-    chair.add(backrest);
-
-    // 4 tapered legs resting firmly on floor (y = 0.22, height = 0.44 -> base at y = 0)
-    const legGeo = new THREE.CylinderGeometry(0.016, 0.011, 0.44, 12);
-    [
-      [-0.18, -0.18],
-      [0.18, -0.18],
-      [-0.18, 0.18],
-      [0.18, 0.18],
-    ].forEach(([lx, lz]) => {
-      const leg = new THREE.Mesh(legGeo, walnutMat);
-      leg.position.set(lx, 0.22, lz);
-      leg.castShadow = true;
-      chair.add(leg);
-    });
-
-    return chair;
+    const chairGroup = new THREE.Group();
+    const chairInst = createReferenceArmchair(boucleMat, walnutMat);
+    chairInst.group.scale.set(0.76, 0.76, 0.76);
+    chairInst.group.position.set(0, 0.32, 0);
+    chairGroup.add(chairInst.group);
+    chairGroup.userData.chairInst = chairInst;
+    return chairGroup;
   }
 
   const allChairsGroup = new THREE.Group();
@@ -2102,21 +2390,21 @@ export function buildDiningScene() {
 
   // 1. West End Chair (Selected for 360° Inspection)
   const singleChairInteractive = createDetailedDiningChair();
-  singleChairInteractive.position.set(-1.75, 0, 0);
+  singleChairInteractive.position.set(-1.85, 0, 0);
   singleChairInteractive.rotation.y = Math.PI / 2;
   allChairsGroup.add(singleChairInteractive);
 
   // 2. East End Chair
   const eastChair = createDetailedDiningChair();
-  eastChair.position.set(1.75, 0, 0);
+  eastChair.position.set(1.85, 0, 0);
   eastChair.rotation.y = -Math.PI / 2;
   allChairsGroup.add(eastChair);
 
   // 3. North Side 3 Chairs (facing south toward table)
-  const chairSpacingX = 0.82;
+  const chairSpacingX = 0.84;
   [-chairSpacingX, 0, chairSpacingX].forEach((cx) => {
     const c = createDetailedDiningChair();
-    c.position.set(cx, 0, -0.82);
+    c.position.set(cx, 0, -0.86);
     c.rotation.y = 0;
     allChairsGroup.add(c);
   });
@@ -2124,7 +2412,7 @@ export function buildDiningScene() {
   // 4. South Side 3 Chairs (facing north toward table)
   [-chairSpacingX, 0, chairSpacingX].forEach((cx) => {
     const c = createDetailedDiningChair();
-    c.position.set(cx, 0, 0.82);
+    c.position.set(cx, 0, 0.86);
     c.rotation.y = Math.PI;
     allChairsGroup.add(c);
   });
@@ -2133,11 +2421,11 @@ export function buildDiningScene() {
 
   interactiveFurniture.chair = {
     id: 'chair',
-    name: 'STEAM-BENT WALNUT & WOVEN DINING CHAIRS',
+    name: 'MID-CENTURY SCULPTED WALNUT & BOUCLÉ DINING CHAIRS',
     shortName: 'DINING CHAIR',
     type: 'chair',
     group: singleChairInteractive,
-    hotspotPos: [-1.75, 0.72, 0],
+    hotspotPos: [-1.85, 0.72, 0],
     features: { canRotate: true, canExplode: true, hasDoors: false, hasDrawers: false },
     materialsSupported: ['smoked_walnut', 'natural_oak', 'boucle', 'leather'],
     defaultMaterial: 'smoked_walnut',
@@ -2148,13 +2436,19 @@ export function buildDiningScene() {
       });
     },
     setExplode: (progress) => {
-      singleChairInteractive.children[0].position.y = 0.44 + progress * 0.4;
-      singleChairInteractive.children[1].position.z = -0.12 - progress * 0.35;
+      const inst = singleChairInteractive.userData.chairInst;
+      if (inst) {
+        inst.backGroup.position.z = -0.28 - progress * 0.45;
+        inst.seatGroup.position.y = 0.08 + progress * 0.35;
+      }
     },
     reset: () => {
       singleChairInteractive.rotation.y = Math.PI / 2;
-      singleChairInteractive.children[0].position.y = 0.44;
-      singleChairInteractive.children[1].position.z = -0.12;
+      const inst = singleChairInteractive.userData.chairInst;
+      if (inst) {
+        inst.backGroup.position.z = -0.28;
+        inst.seatGroup.position.y = 0.08;
+      }
     },
   };
 

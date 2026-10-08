@@ -27,10 +27,10 @@ const STATUS = {
 // ─── Kitchen hotspot definitions (3-D positions) ──────────────────────────────
 const KITCHEN_HOTSPOTS = [
   { id: 'upper_cabs',  label: 'UPPER CABINETS',  pos: [-0.8,  2.0, -0.55], action: 'door' },
-  { id: 'lower_draw',  label: 'DRAWERS',          pos: [-0.6,  0.55, -0.20], action: 'drawer' },
+  { id: 'lower_draw',  label: 'DRAWERS',          pos: [-0.45, 0.55, -0.20], action: 'drawer' },
   { id: 'countertop',  label: 'COUNTERTOP',        pos: [ 0.0,  0.90, -0.40], action: 'material' },
-  { id: 'island',      label: 'ISLAND STORAGE',   pos: [ 0.6,  0.94,  0.50], action: 'island_draw' },
-  { id: 'lighting',    label: 'UNDER-CABINET LED', pos: [-1.1,  1.30, -0.38], action: 'led' },
+  { id: 'island',      label: 'ISLAND STORAGE',   pos: [ 0.60, 0.94,  1.95], action: 'island_draw' },
+  { id: 'lighting',    label: 'UNDER-CABINET LED', pos: [-1.0,  1.30, -0.38], action: 'led' },
 ];
 
 export default function KitchenViewer() {
@@ -41,14 +41,14 @@ export default function KitchenViewer() {
   const kitchenRef   = useRef(null);
   const rafRef       = useRef(null);
 
-  // Camera orbit
-  const azimRef    = useRef(-0.25);
+  // Camera orbit (framed with comfortable view of both wall counter and forward island at z=1.95)
+  const azimRef    = useRef(-0.38);
   const elevRef    = useRef(0.28);
-  const radiusRef  = useRef(4.8);
-  const tAzimRef   = useRef(-0.25);
+  const radiusRef  = useRef(6.2);
+  const tAzimRef   = useRef(-0.38);
   const tElevRef   = useRef(0.28);
-  const tRadRef    = useRef(4.8);
-  const targetRef  = useRef(new THREE.Vector3(0, 0.9, 0));
+  const tRadRef    = useRef(6.2);
+  const targetRef  = useRef(new THREE.Vector3(0.15, 0.95, 0.70));
   const velRef     = useRef(0);
   const draggingRef= useRef(false);
   const prevPosRef = useRef({ x: 0, y: 0 });
@@ -64,16 +64,18 @@ export default function KitchenViewer() {
   const [doorsOpen,     setDoorsOpen]     = useState(false);
   const [drawersOpen,   setDrawersOpen]   = useState(false);
   const [ledsOn,        setLedsOn]        = useState(true);
+  const [islandDist,    setIslandDist]    = useState(1.95);
   const [status,        setStatus]        = useState('');
   const [animating,     setAnimating]     = useState(false);
   const animatingRef   = useRef(false);
   const [selectedHotspot, setSelectedHotspot] = useState(null);
   const [projHotspots,  setProjHotspots]  = useState([]);
   const [showPanel,     setShowPanel]     = useState(false);
-  const [cabinetColor,  setCabinetColor]  = useState(KITCHEN_CABINET_COLORS[5]);  // Forest Green
+  const [cabinetColor,  setCabinetColor]  = useState(KITCHEN_CABINET_COLORS[0]);  // Champagne Cream / Sand Beige
   const [counterColor,  setCounterColor]  = useState(KITCHEN_COUNTERTOP_COLORS[0]);
   const [hardwareColor, setHardwareColor] = useState(KITCHEN_HARDWARE_COLORS[0]);
   const [showColorPanel, setShowColorPanel] = useState(false);
+  const [showAntiGravityCard, setShowAntiGravityCard] = useState(true);
 
   // Keep animatingRef in sync so callbacks can read it without stale closure
   const setAnimatingSync = (v) => { animatingRef.current = v; setAnimating(v); };
@@ -99,7 +101,7 @@ export default function KitchenViewer() {
     renderer.setSize(W, H);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type    = THREE.PCFShadowMap;
     renderer.toneMapping       = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.18;
     container.appendChild(renderer.domElement);
@@ -366,16 +368,37 @@ export default function KitchenViewer() {
     kitchenRef.current?.setDoorOpen(0);
     kitchenRef.current?.setDrawerOpen(0);
     kitchenRef.current?.setExplode(0);
+    kitchenRef.current?.setIslandZ(1.95);
+    setIslandDist(1.95);
     doorsOpenRef.current = false; drawersOpenRef.current = false; isExplodedRef.current = false;
     setDoorsOpen(false); setDrawersOpen(false); setIsExploded(false);
-    tAzimRef.current  = -0.25;
+    tAzimRef.current  = -0.38;
     tElevRef.current  =  0.28;
-    tRadRef.current   =  4.8;
-    targetRef.current.set(0, 0.9, 0);
+    tRadRef.current   =  6.2;
+    targetRef.current.set(0.15, 0.95, 0.70);
     setSelectedHotspot(null);
     setShowColorPanel(false);
     setStatus('');
   }, []);
+
+  // Toggle island clearance distance smoothly
+  const handleToggleIslandDist = useCallback(() => {
+    if (animatingRef.current) return;
+    const nextZ = islandDist >= 2.25 ? 1.95 : 2.30;
+    setIslandDist(nextZ);
+    const currentZ = kitchenRef.current?.islandGroup?.position.z || 1.95;
+    const obj = { z: currentZ };
+    gsap.to(obj, {
+      z: nextZ,
+      duration: 0.8,
+      ease: 'power2.out',
+      onUpdate: () => {
+        kitchenRef.current?.setIslandZ(obj.z);
+      },
+    });
+    const islandHs = KITCHEN_HOTSPOTS.find(h => h.id === 'island');
+    if (islandHs) islandHs.pos[2] = nextZ;
+  }, [islandDist]);
 
   // Hotspot click
   const handleHotspot = (hs) => {
@@ -488,6 +511,14 @@ export default function KitchenViewer() {
         <button style={btnDark} onClick={handleOpenAll} disabled={animating}>OPEN ALL</button>
         <button style={btnDark} onClick={handleCloseAll} disabled={animating}>CLOSE ALL</button>
         <button
+          style={islandDist >= 2.25 ? { ...btnGold } : { ...btnDark, border: '1px solid rgba(163,190,140,0.5)' }}
+          onClick={handleToggleIslandDist}
+          disabled={animating}
+          title="Toggle front island table distance"
+        >
+          {islandDist >= 2.25 ? 'TABLE DISTANCE: 2.30M (WIDE)' : 'TABLE DISTANCE: 1.95M (SPACIOUS)'}
+        </button>
+        <button
           style={isExploded ? { ...btnGold } : { ...btnDark, border: '1px solid rgba(163,190,140,0.5)' }}
           onClick={handleExplode} disabled={animating}
         >
@@ -500,6 +531,46 @@ export default function KitchenViewer() {
           <RefreshCw size={10} /> RESET
         </button>
       </div>
+
+      {/* ── Anti-Gravity Open State Card ────────────────────────────────────── */}
+      {showAntiGravityCard && (
+        <div
+          className="no-drag"
+          style={{
+            position: 'absolute',
+            bottom: 28,
+            right: 28,
+            width: 250,
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(16px)',
+            color: '#121110',
+            padding: '14px 16px',
+            borderRadius: '2px',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.4)',
+            zIndex: 60,
+            border: '1px solid rgba(20, 20, 20, 0.1)',
+            animation: 'kitchenFadeIn 0.3s ease-out',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#121110' }}>
+              SPACIOUS ISLAND CLEARANCE:
+            </span>
+            <button
+              onClick={() => setShowAntiGravityCard(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7a756c', fontSize: '11px', padding: 0 }}
+            >
+              ✕
+            </button>
+          </div>
+          <p style={{ fontSize: '10px', color: '#666', lineHeight: 1.45, margin: '0 0 8px 0', fontFamily: 'var(--font-sans)' }}>
+            Island table positioned at {islandDist}m forward offset. All doors swing open freely with over 95cm clear walkway without hitting the table.
+          </p>
+          <div style={{ fontSize: '9px', fontWeight: 800, letterSpacing: '0.14em', color: '#121110', textTransform: 'uppercase' }}>
+            STATE: {doorsOpen && drawersOpen ? 'FULLY OPEN (NO CLASH).' : drawersOpen ? 'DRAWERS OPEN.' : doorsOpen ? 'DOORS OPEN (CLEAR).' : isExploded ? 'EXPLODED.' : 'ASSEMBLED.'}
+          </div>
+        </div>
+      )}
 
       {/* ── Zoom controls ───────────────────────────────────────────────────── */}
       <div className="no-drag" style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 6, zIndex: 50 }}>

@@ -106,11 +106,12 @@ export default function ConfiguratorSection() {
         <div
           style={{
             position: 'absolute',
-            top: '92px',
-            right: '36px',
+            top: '84px',
+            right: '32px',
             zIndex: 25,
             pointerEvents: 'none',
             textAlign: 'right',
+            maxWidth: '320px',
           }}
         >
           <span
@@ -129,12 +130,12 @@ export default function ConfiguratorSection() {
           <h2
             className="font-serif"
             style={{
-              fontSize: 'clamp(24px, 3.2vw, 42px)',
+              fontSize: 'clamp(18px, 2.1vw, 28px)',
               fontWeight: 400,
               letterSpacing: '0.04em',
               color: '#121110',
               margin: '0 0 2px 0',
-              lineHeight: 1.1,
+              lineHeight: 1.15,
             }}
           >
             {currentObject.name}

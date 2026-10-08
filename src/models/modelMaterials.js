@@ -359,9 +359,10 @@ export function createLinenBump() {
 }
 
 export function createFurnitureMaterial(materialKey) {
-  const matConfig = SHOWROOM_MATERIALS[materialKey] || SHOWROOM_MATERIALS.natural_oak;
+  const effectiveKey = (materialKey === 'warm_walnut' || materialKey === 'walnut') ? 'smoked_walnut' : materialKey;
+  const matConfig = SHOWROOM_MATERIALS[effectiveKey] || SHOWROOM_MATERIALS[materialKey] || SHOWROOM_MATERIALS.natural_oak;
 
-  if (materialKey === 'natural_oak') {
+  if (effectiveKey === 'natural_oak') {
     const map = createWoodTexture(false);
     return new THREE.MeshStandardMaterial({
       map,
@@ -371,13 +372,13 @@ export function createFurnitureMaterial(materialKey) {
     });
   }
 
-  if (materialKey === 'smoked_walnut') {
+  if (effectiveKey === 'smoked_walnut') {
     const map = createWoodTexture(true);
     return new THREE.MeshStandardMaterial({
       map,
-      color: new THREE.Color(matConfig.color),
-      roughness: matConfig.roughness,
-      metalness: matConfig.metalness,
+      color: new THREE.Color(matConfig.color || '#513d30'),
+      roughness: matConfig.roughness || 0.7,
+      metalness: matConfig.metalness || 0.05,
     });
   }
 

@@ -92,9 +92,10 @@ export class NightConsoleModel {
     const drawerW = consoleW - thickness * 2 - 0.01;
     const drawerH = 0.13;
     const drawerD = consoleD - 0.04;
+    this.baseDrawerZ = consoleD / 2 - 0.01;
 
     this.drawerGroup = new THREE.Group();
-    this.drawerGroup.position.set(0, consoleH - thickness - drawerH / 2 - 0.015, 0);
+    this.drawerGroup.position.set(0, consoleH - thickness - drawerH / 2 - 0.015, this.baseDrawerZ);
 
     const dFront = new THREE.Mesh(new THREE.BoxGeometry(drawerW, drawerH, 0.02), this.mainMaterial);
     dFront.castShadow = true;
@@ -129,7 +130,7 @@ export class NightConsoleModel {
 
   setDrawerOpen(progress) {
     this.drawerOpenProgress = progress;
-    this.drawerGroup.position.z = progress * 0.28;
+    this.drawerGroup.position.z = (this.baseDrawerZ || 0.21) + progress * 0.26;
   }
 
   setExplode(progress) {
@@ -137,7 +138,7 @@ export class NightConsoleModel {
     const p = progress;
 
     this.topGroup.position.y = 0.54 - 0.028 / 2 + p * 0.55;
-    this.drawerGroup.position.z = p * 0.45;
+    this.drawerGroup.position.z = (this.baseDrawerZ || 0.21) + p * 0.45;
     this.drawerGroup.position.y = 0.54 - 0.028 - 0.13 / 2 - 0.015 + p * 0.2;
     this.sideL.position.x = -0.29 + 0.028 / 2 - p * 0.35;
     this.sideR.position.x = 0.29 - 0.028 / 2 + p * 0.35;

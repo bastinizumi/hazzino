@@ -131,7 +131,7 @@ export function createGrandWardrobeLabModel(mainMat, secondaryMat, colorHex) {
     type: 'wardrobe',
     rawModel: wardrobe,
     setDoorOpen: (progress) => wardrobe.setDoorOpen(progress),
-    setDrawerOpen: (progress) => wardrobe.setDoorOpen(progress),
+    setDrawerOpen: (progress) => wardrobe.setDrawerOpen(progress),
     setExplode: (progress) => wardrobe.setExplode(progress),
     updateMaterials: (mMat, sMat) => wardrobe.updateMaterials(mMat, sMat),
     dispose: () => wardrobe.dispose(),
@@ -162,14 +162,16 @@ export function createModularCupboardLabModel(mainMat, secondaryMat, colorHex) {
 // 05 — TEA TABLE (NEW)
 // ---------------------------------------------------------------------------
 export function createTeaTableLabModel(mainMat, secondaryMat, colorHex) {
-  const teaTable = new TeaTableModel({ id: 'beige_stone' }, colorHex);
-  teaTable.root.scale.set(1.15, 1.15, 1.15);
-  teaTable.root.position.set(0, 0.05, 0);
+  const teaTable = new TeaTableModel({ id: 'white_stone' }, colorHex);
+  teaTable.root.scale.set(1.0, 1.0, 1.0);
+  teaTable.root.position.set(0, 0, 0);
 
   return {
     root: teaTable.root,
     type: 'tea_table',
     rawModel: teaTable,
+    setDoorOpen: (progress) => teaTable.setDoorOpen(progress),
+    setDrawerOpen: (progress) => teaTable.setDrawerOpen(progress),
     setExplode: (progress) => teaTable.setExplode(progress),
     updateMaterials: (mMat, sMat) => teaTable.updateMaterials(mMat, sMat),
     dispose: () => teaTable.dispose(),
@@ -199,8 +201,8 @@ export function createSignatureDiningTableLabModel(mainMat, secondaryMat, colorH
 // ---------------------------------------------------------------------------
 export function createDiningChairLabModel(mainMat, secondaryMat, colorHex) {
   const chair = new DiningChairModel({ id: 'fabric' }, colorHex);
-  chair.root.scale.set(1.35, 1.35, 1.35);
-  chair.root.position.set(0, 0.02, 0);
+  chair.root.scale.set(0.96, 0.96, 0.96);
+  chair.root.position.set(0, 0, 0);
 
   return {
     root: chair.root,

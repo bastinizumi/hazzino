@@ -66,7 +66,7 @@ export default function Footer({ onScrollTop }) {
         {/* Col 2: Navigation */}
         <div>
           <div style={{ fontSize: '11px', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(255, 255, 255, 0.5)', marginBottom: '18px' }}>
-            EXPLORE
+            NAVIGATION
           </div>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', padding: 0 }}>
             {['WORK', 'STUDIO', 'SERVICES', 'MATERIALS', 'FURNITURE', 'CONFIGURATOR'].map((link) => (

@@ -107,28 +107,28 @@ export class GrandWardrobeModel {
     this.root.add(this.internalLight);
 
     // 7. INTERIOR LEFT: Upper Hat Shelf & Bronze Clothes Rail
-    const upperShelfGeom = new THREE.BoxGeometry(width / 2 - thickness, 0.025, depth - 0.08);
+    const upperShelfGeom = new THREE.BoxGeometry(width / 2 - thickness, 0.025, depth - 0.12);
     this.shelfHat = new THREE.Mesh(upperShelfGeom, this.woodMaterial);
-    this.shelfHat.position.set(-width / 4, height - 0.45, -0.02);
+    this.shelfHat.position.set(-width / 4, height - 0.45, 0);
     this.root.add(this.shelfHat);
 
     // Bronze Hanger Rail
     const railGeom = new THREE.CylinderGeometry(0.012, 0.012, width / 2 - thickness - 0.04, 16);
     this.hangerRail = new THREE.Mesh(railGeom, this.brassMaterial);
     this.hangerRail.rotation.z = Math.PI / 2;
-    this.hangerRail.position.set(-width / 4, height - 0.55, -0.02);
+    this.hangerRail.position.set(-width / 4, height - 0.55, 0);
     this.root.add(this.hangerRail);
 
     // Hanging garments (tailored coats on hangers)
     this.garmentsGroup = new THREE.Group();
     [-0.32, -0.16, 0.0, 0.16, 0.32].forEach((gx, idx) => {
       const coat = new THREE.Mesh(
-        new THREE.BoxGeometry(0.09, 0.95, 0.38),
+        new THREE.BoxGeometry(0.09, 0.95, 0.34),
         idx % 2 === 0
           ? new THREE.MeshStandardMaterial({ color: 0x242322, roughness: 0.9 })
           : new THREE.MeshStandardMaterial({ color: 0x5a544c, roughness: 0.9 })
       );
-      coat.position.set(-width / 4 + gx, height - 1.15, -0.02);
+      coat.position.set(-width / 4 + gx, height - 1.15, 0);
       this.garmentsGroup.add(coat);
     });
     this.root.add(this.garmentsGroup);
@@ -137,7 +137,7 @@ export class GrandWardrobeModel {
     this.shelvesGroup = new THREE.Group();
     [0.72, 1.15, 1.58, 2.02].forEach((sy) => {
       const shelf = new THREE.Mesh(upperShelfGeom, this.woodMaterial);
-      shelf.position.set(width / 4, sy, -0.02);
+      shelf.position.set(width / 4, sy, 0);
       this.shelvesGroup.add(shelf);
     });
     this.root.add(this.shelvesGroup);
@@ -146,11 +146,16 @@ export class GrandWardrobeModel {
     this.drawerSliderGroup = new THREE.Group();
     const dWidth = width / 2 - thickness - 0.04;
     const dHeight = 0.13;
-    const dDepth = depth - 0.12;
+    const dDepth = 0.36; // Clean interior depth, safely inside cabinet
+    this.drawerBaseZ = 0.14; // Tucked inside behind closed doors (0.338) and 7.5cm ahead of back wall (-0.305)
 
     [0, 1, 2, 3].forEach((di) => {
       const drawer = new THREE.Group();
-      drawer.position.set(width / 4, plinthH + thickness + 0.08 + di * (dHeight + 0.02), 0);
+      drawer.position.set(
+        width / 4,
+        plinthH + thickness + 0.08 + di * (dHeight + 0.02),
+        this.drawerBaseZ
+      );
 
       const dFront = new THREE.Mesh(
         new THREE.BoxGeometry(dWidth, dHeight, 0.02),
@@ -240,13 +245,16 @@ export class GrandWardrobeModel {
       d.pivot.rotation.y = d.openAngle * progress;
     });
 
-    // When opened, interior drawers slightly slide out and internal lights glow
-    this.interiorDrawers.forEach((dr, idx) => {
-      dr.position.z = progress * (0.08 + idx * 0.06);
-    });
-
+    // Reveal interior lighting
     this.ledMaterial.opacity = 0.1 + progress * 0.9;
     this.internalLight.intensity = progress * 1.8;
+  }
+
+  setDrawerOpen(progress) {
+    this.drawerOpenProgress = progress;
+    this.interiorDrawers.forEach((dr, idx) => {
+      dr.position.z = this.drawerBaseZ + progress * (0.28 + idx * 0.04);
+    });
   }
 
   setExplode(progress) {
@@ -275,7 +283,7 @@ export class GrandWardrobeModel {
 
     // Interior drawers pull forward
     this.interiorDrawers.forEach((dr, idx) => {
-      dr.position.z = p * (0.35 + idx * 0.1);
+      dr.position.z = this.drawerBaseZ + p * (0.35 + idx * 0.1);
     });
 
     // Hanging section moves forward
@@ -302,6 +310,7 @@ export class GrandWardrobeModel {
 
   reset() {
     this.setDoorOpen(0);
+    this.setDrawerOpen(0);
     this.setExplode(0);
     this.root.rotation.y = 0;
   }

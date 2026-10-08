@@ -34,7 +34,7 @@ export default function Navbar({ onNavigate }) {
 
   const navLinks = [
     { label: 'WORK', target: '#work' },
-    { label: 'SHOWROOM 3D', target: '#showroom' },
+    { label: 'KITCHEN 3D', target: '#kitchen' },
     { label: 'STUDIO', target: '#studio' },
     { label: 'SERVICES', target: '#services' },
     { label: 'MATERIALS', target: '#materials' },

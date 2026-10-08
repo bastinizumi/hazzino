@@ -285,29 +285,16 @@ export default function HeroSection({ onExplore, onStartProject }) {
         >
           <button
             onClick={() => {
-              if (onExplore) onExplore();
-              else {
-                const el = document.querySelector('#world');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="btn-magnetic solid-white"
-          >
-            <span>EXPLORE OUR SPACES</span>
-            <ArrowUpRight size={14} />
-          </button>
-
-          <button
-            onClick={() => {
               if (onStartProject) onStartProject();
               else {
                 const el = document.querySelector('#contact');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }
             }}
-            className="btn-magnetic"
+            className="btn-magnetic solid-white"
           >
             <span>START YOUR PROJECT</span>
+            <ArrowUpRight size={14} />
           </button>
         </div>
       </div>
@@ -337,7 +324,7 @@ export default function HeroSection({ onExplore, onStartProject }) {
             color: 'rgba(255, 255, 255, 0.7)',
           }}
         >
-          SCROLL TO EXPLORE
+          SCROLL TO DISCOVER
         </span>
         <div
           style={{

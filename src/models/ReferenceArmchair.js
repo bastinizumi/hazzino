@@ -18,6 +18,9 @@ export function createReferenceArmchair(cushionMaterial, woodMaterial) {
   const legBottomRadius = 0.017;
   const halfWidth = 0.44; // Half-width between left and right armrests
 
+  const cushionMeshes = [];
+  const woodMeshes = [];
+
   // =========================================================================
   // 1. SEAT CUSHION (Thick tailored cushion angled back ~6.5 degrees)
   // =========================================================================
@@ -62,6 +65,7 @@ export function createReferenceArmchair(cushionMaterial, woodMaterial) {
   const weltGeo = new THREE.TubeGeometry(weltCurve, 64, 0.009, 8, true);
   const weltMesh = new THREE.Mesh(weltGeo, cushionMaterial);
   seatCushionGroup.add(weltMesh);
+  cushionMeshes.push(seatMesh, weltMesh);
 
   chair.add(seatCushionGroup);
 
@@ -102,6 +106,7 @@ export function createReferenceArmchair(cushionMaterial, woodMaterial) {
   const channelGeo = new THREE.TubeGeometry(channelCurve, 16, 0.008, 8, false);
   const channelMesh = new THREE.Mesh(channelGeo, cushionMaterial);
   backCushionGroup.add(channelMesh);
+  cushionMeshes.push(lowerBackMesh, upperBackMesh, channelMesh);
 
   chair.add(backCushionGroup);
 
@@ -168,6 +173,7 @@ export function createReferenceArmchair(cushionMaterial, woodMaterial) {
     backStile.rotation.x = -0.32;
     backStile.castShadow = true;
     chair.add(backStile);
+    woodMeshes.push(armMesh, railMesh, frontLeg, rearLeg, backStile);
   });
 
   // =========================================================================
@@ -180,6 +186,7 @@ export function createReferenceArmchair(cushionMaterial, woodMaterial) {
   frontCross.position.set(0, 0.04, 0.22);
   frontCross.castShadow = true;
   chair.add(frontCross);
+  woodMeshes.push(frontCross);
 
   // Rear crossbar under seat
   const rearCrossGeo = new THREE.CylinderGeometry(0.016, 0.016, halfWidth * 2 - 0.04, 16);
@@ -188,6 +195,7 @@ export function createReferenceArmchair(cushionMaterial, woodMaterial) {
   rearCross.position.set(0, 0.02, -0.30);
   rearCross.castShadow = true;
   chair.add(rearCross);
+  woodMeshes.push(rearCross);
 
   // Top rear crossbar behind backrest
   const topBackCrossGeo = new THREE.CylinderGeometry(0.018, 0.018, halfWidth * 1.76, 16);
@@ -196,10 +204,13 @@ export function createReferenceArmchair(cushionMaterial, woodMaterial) {
   topBackCross.position.set(0, 0.68, -0.42);
   topBackCross.castShadow = true;
   chair.add(topBackCross);
+  woodMeshes.push(topBackCross);
 
   return {
     group: chair,
     seatGroup: seatCushionGroup,
     backGroup: backCushionGroup,
+    cushionMeshes,
+    woodMeshes,
   };
 }

@@ -59,10 +59,8 @@ export default function App() {
     const checkHash = () => {
       const hash = window.location.hash;
       if (hash.startsWith('#showroom')) {
-        const roomId = hash.replace('#showroom-', '').replace('#showroom', '') || 'living';
-        const matched = SHOWROOM_ROOMS.find((r) => r.id === roomId) || SHOWROOM_ROOMS[0];
-        setActiveShowroomRoom(matched);
-        if (lenisRef.current) lenisRef.current.stop();
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        setActiveShowroomRoom(null);
       }
     };
     checkHash();
@@ -72,11 +70,7 @@ export default function App() {
 
   const handleNavigate = (target) => {
     if (target.startsWith('#showroom')) {
-      const roomId = target.replace('#showroom-', '').replace('#showroom', '') || 'living';
-      const matched = SHOWROOM_ROOMS.find((r) => r.id === roomId) || SHOWROOM_ROOMS[0];
-      setActiveShowroomRoom(matched);
-      if (lenisRef.current) lenisRef.current.stop();
-      return;
+      target = '#kitchen';
     }
     if (lenisRef.current) {
       lenisRef.current.scrollTo(target, { offset: 0, duration: 1.6 });
@@ -97,7 +91,6 @@ export default function App() {
 
       {/* 01. HERO SECTION: Living Room Showroom Camera Push */}
       <HeroSection
-        onExplore={() => handleNavigate('#showroom')}
         onStartProject={() => handleNavigate('#contact')}
       />
 
@@ -111,17 +104,7 @@ export default function App() {
       <KitchenSection />
 
       {/* 05. HOME INTERIORS: Cinematic Room Walkthrough (Living → Kitchen → Bedroom → Dining → Bath) */}
-      <HomeInteriorsSection
-        onSelectRoom={(room) => {
-          // Find matching showroom room configuration or fallback to first
-          const matched =
-            SHOWROOM_ROOMS.find((r) => r.id === room.id) || SHOWROOM_ROOMS[0];
-          setActiveShowroomRoom(matched);
-          if (lenisRef.current) {
-            lenisRef.current.stop();
-          }
-        }}
-      />
+      <HomeInteriorsSection />
 
       {/* 06. PREMIUM CONFIGURATOR: 360° 3D Interactive Chair & Ivory Sliding Panel */}
       <ConfiguratorSection />
